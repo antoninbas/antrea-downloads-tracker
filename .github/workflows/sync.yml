@@ -1,0 +1,47 @@
+name: Sync
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    # every day at 6am
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  query:
+    strategy:
+      matrix:
+        image: [antrea-ubuntu, antrea-windows, flow-aggregator]
+    env:
+      DOCKER_IMAGE: "antrea/${{ matrix.image }}"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: query-and-store
+      run: |
+        curl https://hub.docker.com/v2/repositories/$DOCKER_IMAGE -o result.json
+        COUNT=$(jq '.pull_count' result.json)
+        DATE=$(jq '.last_updated' result.json)
+        ENTRY="${DATE}, ${COUNT}"
+        FILE="${DOCKER_IMAGE}.csv"
+        echo "Writing new entry for ${DOCKER_IMAGE} to ${FILE}: ${ENTRY}"
+        echo ${ENTRY} >> ${FILE}
+    - uses: EndBug/add-and-commit@v7
+      if: ${{ github.event_name == 'schedule' }}
+      with:
+        add: "${{ env.DOCKER_IMAGE }}.csv"
+        default_author: github_actor
+        message: "Daily update for ${{ env.DOCKER_IMAGE }}"
+        signoff: false
+    - uses: EndBug/add-and-commit@v7
+      if: ${{ github.event_name == 'workflow_dispatch'}}
+      with:
+        add: "${{ env.DOCKER_IMAGE }}.csv"
+        default_author: github_actor
+        message: "Manual update for ${{ env.DOCKER_IMAGE }}"
+        signoff: false
