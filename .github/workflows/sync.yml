@@ -17,6 +17,8 @@ jobs:
     strategy:
       matrix:
         image: [antrea-ubuntu, antrea-windows, flow-aggregator]
+      # avoid conflicts when committing
+      max-parallel: 1
     env:
       DOCKER_IMAGE: "antrea/${{ matrix.image }}"
     runs-on: ubuntu-latest
