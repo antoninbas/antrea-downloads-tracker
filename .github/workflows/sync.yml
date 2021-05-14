@@ -35,13 +35,13 @@ jobs:
       if: ${{ github.event_name == 'schedule' }}
       with:
         add: "${{ matrix.image }}.csv"
-        default_author: github_actor
+        default_author: github_actions
         message: "Daily update for ${{ env.DOCKER_IMAGE }}"
         signoff: false
     - uses: EndBug/add-and-commit@v7
       if: ${{ github.event_name == 'workflow_dispatch'}}
       with:
-        add: "${{ env.DOCKER_IMAGE }}.csv"
-        default_author: github_actor
+        add: "${{ matrix.image }}.csv"
+        default_author: github_actions
         message: "Manual update for ${{ env.DOCKER_IMAGE }}"
         signoff: false
