@@ -24,17 +24,17 @@ jobs:
     - uses: actions/checkout@v2
     - name: query-and-store
       run: |
-        curl https://hub.docker.com/v2/repositories/$DOCKER_IMAGE -o result.json
+        curl https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/ -o result.json
         COUNT=$(jq '.pull_count' result.json)
         DATE=$(jq '.last_updated' result.json)
         ENTRY="${DATE}, ${COUNT}"
-        FILE="${DOCKER_IMAGE}.csv"
+        FILE="${{ matrix.image }}.csv"
         echo "Writing new entry for ${DOCKER_IMAGE} to ${FILE}: ${ENTRY}"
-        echo ${ENTRY} >> ${FILE}
+        echo "${ENTRY}" >> ${FILE}
     - uses: EndBug/add-and-commit@v7
       if: ${{ github.event_name == 'schedule' }}
       with:
-        add: "${{ env.DOCKER_IMAGE }}.csv"
+        add: "${{ matrix.image }}.csv"
         default_author: github_actor
         message: "Daily update for ${{ env.DOCKER_IMAGE }}"
         signoff: false
