@@ -22,8 +22,10 @@ jobs:
     env:
       DOCKER_IMAGE: "antrea/${{ matrix.image }}"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: query-and-store
       run: |
         curl https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/ -o result.json
@@ -33,17 +35,17 @@ jobs:
         FILE="${{ matrix.image }}.csv"
         echo "Writing new entry for ${DOCKER_IMAGE} to ${FILE}: ${ENTRY}"
         echo "${ENTRY}" >> ${FILE}
-    - uses: EndBug/add-and-commit@v7
+    - uses: EndBug/add-and-commit@v9
       if: ${{ github.event_name == 'schedule' }}
       with:
+        pull: "--rebase --autostash"
         add: "${{ matrix.image }}.csv"
         default_author: github_actions
         message: "Daily update for ${{ env.DOCKER_IMAGE }}"
-        signoff: false
-    - uses: EndBug/add-and-commit@v7
+    - uses: EndBug/add-and-commit@v9
       if: ${{ github.event_name == 'workflow_dispatch'}}
       with:
+        pull: "--rebase --autostash"
         add: "${{ matrix.image }}.csv"
         default_author: github_actions
         message: "Manual update for ${{ env.DOCKER_IMAGE }}"
-        signoff: false
