@@ -16,7 +16,7 @@ jobs:
   query:
     strategy:
       matrix:
-        image: [antrea-ubuntu, antrea-windows, flow-aggregator]
+        image: [antrea-ubuntu, antrea-windows, flow-aggregator, antrea-agent-ubuntu, antrea-controller-ubuntu]
       # avoid conflicts when committing
       max-parallel: 1
     env:
